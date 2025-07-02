@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบประเมินความรุนแรงของโรคซึมเศร้า</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Kanit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #4a5568;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .tab-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 1.1rem;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+            background: white;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .diagnosis-result {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding: 20px 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .recommendation {
+            background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+            border: 2px solid #38b2ac;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            font-weight: 600;
+            color: #234e52;
+        }
+
+        .criteria-summary {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .criteria-summary h4 {
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .criteria-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .severity-mild {
+            background: linear-gradient(135deg, #68d391 0%, #48bb78 100%);
+            color: white;
+        }
+
+        .severity-moderate {
+            background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+            color: white;
+        }
+
+        .severity-severe {
+            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+            color: white;
+        }
+
+        .keywords {
+            margin-top: 20px;
+        }
+
+        .keywords h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .keyword-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .keyword-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .dashboard-placeholder {
+            text-align: center;
+            padding: 80px 20px;
+            color: #718096;
+        }
+
+        .dashboard-placeholder h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #4a5568;
+        }
+
+        .dashboard-placeholder p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .chart-placeholder {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border: 2px dashed #cbd5e0;
+            border-radius: 20px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 1.1rem;
+            color: #a0aec0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 ระบบประเมินโรคซึมเศร้าตาม DSM-5</h1>
+            <p>วิเคราะห์เวชระเบียนภาษาไทยตามมาตรฐาน DSM-5 Criteria</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('analyze')">📊 วิเคราะห์ข้อมูล</button>
+            <button class="nav-tab" onclick="showTab('dashboard')">📈 Dashboard</button>
+        </div>
+
+        <div id="analyze" class="tab-content active">
+            <div class="form-group">
+                <label for="medicalRecord">กรอกข้อมูลเวชระเบียนภาษาไทย:</label>
+                <textarea 
+                    id="medicalRecord" 
+                    placeholder="กรุณากรอกข้อมูลเวชระเบียนของผู้ป่วย เพื่อประเมินตามเกณฑ์ DSM-5&#10;&#10;ตัวอย่าง: ผู้ป่วยรายงานว่ารู้สึกเศร้าใจมาก ไม่สนใจทำกิจกรรมต่างๆ ที่เคยชอบ นอนไม่หลับ เบื่ออาหาร รู้สึกไร้ค่า ไม่มีแรงจูงใจในการทำงาน จดจ่อไม่ได้ และมีความคิดว่าชีวิตไม่มีความหมาย..."
+                ></textarea>
+            </div>
+            
+            <button class="btn" onclick="analyzeText()">🔍 ประเมินตามเกณฑ์ DSM-5</button>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>กำลังวิเคราะห์ข้อมูล...</p>
+            </div>
+            
+            <div id="results" class="results" style="display: none;">
+                <div id="diagnosisResult" class="diagnosis-result"></div>
+                <div id="recommendationBox" class="recommendation"></div>
+                <div class="criteria-summary">
+                    <h4>📋 สรุปการประเมินตาม DSM-5:</h4>
+                    <div class="criteria-info">
+                        <span>จำนวนเกณฑ์ที่พบ:</span>
+                        <span id="criteriaCount">-</span>
+                    </div>
+                    <div class="criteria-info">
+                        <span>เกณฑ์หลัก (อาการเศร้า/ไม่สนใจ):</span>
+                        <span id="coreCriteria">-</span>
+                    </div>
+                    <div class="criteria-info">
+                        <span>คะแนนรวม:</span>
+                        <span id="totalScore">-</span>
+                    </div>
+                </div>
+                <div class="keywords">
+                    <h3>🔍 คำที่พบในการประเมิน DSM-5:</h3>
+                    <div id="keywordTags" class="keyword-tags"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dashboard" class="tab-content">
+            <div class="dashboard-placeholder">
+                <h2>📈 Dashboard</h2>
+                <p>หน้าแสดงกราฟและสถิติข้อมูล</p>
+                <div class="chart-placeholder">
+                    📊 กราฟจะแสดงที่นี่ในอนาคต
+                </div>
+                <div class="chart-placeholder">
+                    📈 สถิติการวิเคราะห์จะแสดงที่นี่ในอนาคต
+                </div>
+                <p style="margin-top: 20px; font-style: italic;">
+                    * ฟีเจอร์นี้จะพัฒนาเพิ่มเติมในอนาคต
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // เกณฑ์ DSM-5 สำหรับ Major Depressive Disorder
+        const dsm5Criteria = {
+            // A1: Depressed mood
+            depressedMood: {
+                keywords: ['เศร้า', 'หดหู่', 'ท้อแท้', 'ใจหาย', 'เศร้าใจ', 'เสียใจ', 'ซึมเศร้า', 'อารมณ์เศร้า', 'รู้สึกเศร้า', 'ความเศร้า'],
+                weight: 2
+            },
+            // A2: Loss of interest or pleasure
+            anhedonia: {
+                keywords: ['ไม่สนใจ', 'เบื่อ', 'ไม่อยากทำ', 'ไม่มีความสุข', 'ไม่เพลิดเพลิน', 'ไม่อยากร่วมกิจกรรม', 'ไม่สนใจสิ่งใดๆ', 'ไม่รู้สึกสนุก'],
+                weight: 2
+            },
+            // A3: Weight loss/gain or appetite changes
+            weightAppetite: {
+                keywords: ['น้ำหนักลด', 'น้ำหนักเพิ่ม', 'เบื่อกิน', 'เบื่ออาหาร', 'ไม่อยากกิน', 'กินไม่ได้', 'กินเยอะ', 'หิวบ่อย', 'ไม่หิว'],
+                weight: 1
+            },
+            // A4: Sleep disturbance
+            sleepDisturbance: {
+                keywords: ['นอนไม่หลับ', 'ตื่นกลางคืน', 'นอนหลับยาก', 'นอนมาก', 'ง่วงเหนื่อย', 'ตื่นเช้า', 'นอนไม่สนิท', 'ไม่อยากตื่น'],
+                weight: 1
+            },
+            // A5: Psychomotor changes
+            psychomotor: {
+                keywords: ['เคลื่อนไหวช้า', 'พูดช้า', 'กระสับกระส่าย', 'นั่งไม่ติด', 'อยู่ไม่นิ่ง', 'เดินไปเดินมา', 'ทำอะไรช้า'],
+                weight: 1
+            },
+            // A6: Fatigue or loss of energy
+            fatigue: {
+                keywords: ['เหนื่อย', 'อ่อนแรง', 'ไม่มีแรง', 'ไม่มีพลัง', 'ไม่มีแรงใจ', 'ไม่มีแรงจูงใจ', 'ไม่อยากทำอะไร', 'ไม่มีกำลังใจ'],
+                weight: 1
+            },
+            // A7: Feelings of worthlessness or guilt
+            worthlessness: {
+                keywords: ['ไร้ค่า', 'ไม่มีค่า', 'ไร้ประโยชน์', 'ผิด', 'ผิดพลาด', 'โทษตัวเอง', 'รู้สึกผิด', 'ตำหนิตัวเอง', 'ไม่ดีพอ'],
+                weight: 1
+            },
+            // A8: Diminished concentration
+            concentration: {
+                keywords: ['จดจ่อไม่ได้', 'สมาธิสั้น', 'จำไม่ได้', 'ความจำเสื่อม', 'คิดไม่ออก', 'ตัดสินใจไม่ได้', 'สับสน', 'งงงวย'],
+                weight: 1
+            },
+            // A9: Suicidal ideation
+            suicidalIdeation: {
+                keywords: ['ตาย', 'ฆ่าตัวตาย', 'ไม่อยากมีชีวิต', 'อยากตาย', 'ความคิดฆ่าตัวตาย', 'ไม่อยากอยู่', 'หมดหวัง', 'ไร้ความหวัง'],
+                weight: 3
+            }
+        };
+
+        function showTab(tabName) {
+            // ซ่อนทุก tab
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+            
+            // แสดง tab ที่เลือก
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function analyzeText() {
+            const text = document.getElementById('medicalRecord').value.trim();
+            
+            if (!text) {
+                alert('กรุณากรอกข้อมูลเวชระเบียนก่อนทำการวิเคราะห์');
+                return;
+            }
+
+            // แสดง loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('results').style.display = 'none';
+
+            // จำลองการประมวลผล
+            setTimeout(() => {
+                const analysis = performAnalysis(text);
+                displayResults(analysis);
+                
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('results').style.display = 'block';
+            }, 2000);
+        }
+
+        function performAnalysis(text) {
+            const textLower = text.toLowerCase();
+            let criteriaScores = {};
+            let foundKeywords = [];
+            let criteriaCount = 0;
+            let totalScore = 0;
+            
+            // วิเคราะห์แต่ละเกณฑ์ DSM-5
+            Object.keys(dsm5Criteria).forEach(criterion => {
+                let criterionFound = false;
+                let criterionKeywords = [];
+                
+                dsm5Criteria[criterion].keywords.forEach(keyword => {
+                    if (textLower.includes(keyword)) {
+                        if (!criterionFound) {
+                            criteriaCount++;
+                            criterionFound = true;
+                            totalScore += dsm5Criteria[criterion].weight;
+                        }
+                        criterionKeywords.push(keyword);
+                        foundKeywords.push(keyword);
+                    }
+                });
+                
+                if (criterionFound) {
+                    criteriaScores[criterion] = {
+                        found: true,
+                        keywords: criterionKeywords,
+                        weight: dsm5Criteria[criterion].weight
+                    };
+                }
+            });
+
+            // ประเมินตาม DSM-5 criteria
+            let diagnosis, severityClass, severityText, recommendation;
+            
+            // ตรวจสอบเกณฑ์หลัก (A1 หรือ A2 ต้องมีอย่างน้อย 1 ข้อ)
+            const hasCoreCriteria = criteriaScores.depressedMood || criteriaScores.anhedonia;
+            
+            if (!hasCoreCriteria) {
+                diagnosis = 'ไม่เข้าเกณฑ์วินิจฉัย';
+                severityClass = 'severity-mild';
+                severityText = '✅ ไม่พบเกณฑ์หลักของโรคซึมเศร้าตาม DSM-5';
+                recommendation = 'ไม่พบสัญญาณที่น่าเป็นห่วง แต่ควรติดตามอย่างต่อเนื่อง';
+            } else if (criteriaCount >= 5) {
+                // มีเกณฑ์ครบ 5 ข้อขึ้นไป = Major Depressive Episode
+                if (criteriaScores.suicidalIdeation || totalScore >= 10) {
+                    diagnosis = 'โรคซึมเศร้า - ระดับรุนแรง';
+                    severityClass = 'severity-severe';
+                    severityText = '🔴 เข้าเกณฑ์วินิจฉัยโรคซึมเศร้าระดับรุนแรง (DSM-5)';
+                    recommendation = '⚠️ ต้องการการรักษาอย่างเร่งด่วน ควรพบจิตแพทย์ทันที';
+                } else {
+                    diagnosis = 'โรคซึมเศร้า - ระดับปานกลาง';
+                    severityClass = 'severity-moderate';
+                    severityText = '🟡 เข้าเกณฑ์วินิจฉัยโรคซึมเศร้าระดับปานกลาง (DSM-5)';
+                    recommendation = 'ควรพบจิตแพทย์เพื่อประเมินและวางแผนการรักษา';
+                }
+            } else if (criteriaCount >= 2) {
+                diagnosis = 'มีอาการซึมเศร้า';
+                severityClass = 'severity-moderate';
+                severityText = '🟠 พบอาการซึมเศร้า ยังไม่เข้าเกณฑ์วินิจฉัยแต่ควรเฝ้าระวัง';
+                recommendation = 'ควรติดตามอาการ หากอาการแย่ลงหรือมีอาการเพิ่มขึ้น ควรปรึกษาแพทย์';
+            } else {
+                diagnosis = 'อาการเล็กน้อย';
+                severityClass = 'severity-mild';
+                severityText = '🟢 พบอาการเล็กน้อย ยังไม่น่าเป็นห่วง';
+                recommendation = 'ควรดูแลสุขภาพจิตและติดตามอาการ';
+            }
+
+            return {
+                diagnosis,
+                severityClass,
+                severityText,
+                recommendation,
+                foundKeywords: [...new Set(foundKeywords)],
+                criteriaCount,
+                totalScore,
+                criteriaScores,
+                hasCoreCriteria
+            };
+        }
+
+        function displayResults(analysis) {
+            const diagnosisResult = document.getElementById('diagnosisResult');
+            const recommendationBox = document.getElementById('recommendationBox');
+            const keywordTags = document.getElementById('keywordTags');
+            const criteriaCount = document.getElementById('criteriaCount');
+            const coreCriteria = document.getElementById('coreCriteria');
+            const totalScore = document.getElementById('totalScore');
+            
+            // แสดงผลการวินิจฉัย
+            diagnosisResult.className = `diagnosis-result ${analysis.severityClass}`;
+            diagnosisResult.textContent = analysis.severityText;
+            
+            // แสดงคำแนะนำ
+            recommendationBox.innerHTML = `<strong>💡 คำแนะนำ:</strong> ${analysis.recommendation}`;
+            
+            // แสดงข้อมูลสรุป
+            criteriaCount.textContent = `${analysis.criteriaCount}/9 เกณฑ์`;
+            coreCriteria.textContent = analysis.hasCoreCriteria ? '✅ พบ' : '❌ ไม่พบ';
+            totalScore.textContent = `${analysis.totalScore} คะแนน`;
+            
+            // แสดงคำที่พบ
+            keywordTags.innerHTML = '';
+            if (analysis.foundKeywords.length > 0) {
+                analysis.foundKeywords.forEach(keyword => {
+                    const tag = document.createElement('span');
+                    tag.className = 'keyword-tag';
+                    tag.textContent = keyword;
+                    keywordTags.appendChild(tag);
+                });
+            } else {
+                const noKeyword = document.createElement('span');
+                noKeyword.textContent = 'ไม่พบคำที่เข้าเกณฑ์ DSM-5';
+                noKeyword.style.color = '#718096';
+                keywordTags.appendChild(noKeyword);
+            }
+        }
+
+        // เพิ่ม event listener สำหรับ Enter ใน textarea
+        document.getElementById('medicalRecord').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                analyzeText();
+            }
+        });
+    </script>
+</body>
+</html>
